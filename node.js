@@ -1,5 +1,3 @@
-// ✅ File đã gộp đầy đủ tính năng: giao diện web, Telegram/Discord, chọn bật proxy, spam chat, điều khiển bot
-
 const mineflayer = require('mineflayer')
 const express = require('express')
 const fetch = require('node-fetch')
@@ -12,17 +10,20 @@ const CHAT_ID = '6790410023'
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`
 const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1376391242576957562/2cmM6ySlCSlbSvYMIn_jVQ6zZLGH6OLx5LLhuzDNh4mxFdHNQSqgRnKcaNvilZ-m8HSe'
 const PIN = '0301'
-const USE_PROXY = false // ✅ Bật/tắt proxy tại đây
+const USE_PROXY = false
 const PROXY_URL = 'socks5://96.126.96.163:9090'
-
 const agent = USE_PROXY ? new SocksProxyAgent(PROXY_URL) : undefined
 
 let bot, botActive = true, spamEnabled = false, spamInterval
 let lastUpdateId = 0, chatBuffer = [], lastLogs = []
+let LAUNCHER_STATE = false
+let CUSTOM_HOST = '2y2c.org'
+let CUSTOM_PORT = 25565
 
 function createBot() {
   bot = mineflayer.createBot({
-    host: '2y2c.org',
+    host: CUSTOM_HOST,
+    port: CUSTOM_PORT,
     username: 'nahiwinhaha',
     version: '1.20.4',
     agent
@@ -73,16 +74,13 @@ function createBot() {
     }
   })
 
-  bot.on('kicked', async reason => await sendMessage(`⛔ Bot bị kick:
-${reason}`))
-  bot.on('error', async err => await sendMessage(`❌ Lỗi bot:
-${err.message || err}`))
+  bot.on('kicked', async reason => await sendMessage(`⛔ Bot bị kick:\n${reason}`))
+  bot.on('error', async err => await sendMessage(`❌ Lỗi bot:\n${err.message || err}`))
   bot.on('end', async () => {
     await sendMessage(`🔁 Bot ngắt kết nối. Đang kết nối lại sau 10s...`)
     if (botActive) setTimeout(createBot, 10000)
   })
 }
-createBot()
 
 setInterval(async () => {
   if (chatBuffer.length === 0) return
@@ -143,6 +141,49 @@ function getSystemStats() {
 const app = express()
 
 app.get('/', (req, res) => {
+  if (!LAUNCHER_STATE) {
+    return res.send(`<!DOCTYPE html><html>
+<head>
+  <title>Minecraft Launcher</title>
+  <style>
+    body {
+      margin: 0; background: url('https://i.imgur.com/lUQwMTf.png'); background-size: cover;
+      font-family: monospace; color: white; text-align: center;
+    }
+    .launcher {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.6); padding: 30px; border-radius: 12px; width: 300px;
+    }
+    input, button {
+      width: 100%; padding: 10px; margin: 5px 0; border: none; border-radius: 8px;
+    }
+    button { background: #2e8b57; color: white; font-weight: bold; cursor: pointer; }
+    .fps {
+      position: absolute; top: 10px; left: 10px; font-size: 14px; color: lime;
+    }
+  </style>
+  <script>
+    setInterval(() => {
+      document.getElementById('fps').innerText = 'FPS: ' + (20 + Math.floor(Math.random()*5));
+    }, 1000);
+  </script>
+</head>
+<body>
+  <div id="fps" class="fps">FPS: 24</div>
+  <div class="launcher">
+    <h2>🎮 Minecraft Launcher</h2>
+    <form action="/launch" method="GET">
+      <input name="ip" placeholder="🌐 Server IP" value="2y2c.org"/>
+      <input name="port" placeholder="🛠 Port" value="25565"/>
+      <button type="submit">🔌 Chơi mạng</button>
+    </form>
+    <form action="/offline" method="GET">
+      <button>📴 Chơi đơn (Offline)</button>
+    </form>
+  </div>
+</body></html>`)
+  }
+
   const pin = req.query.pin
   if (pin !== PIN) return res.send(`<form><input name="pin" placeholder="🔐 Nhập mã PIN"/><button>Vào</button></form>`)
   const players = bot?.players ? Object.keys(bot.players).map(p => `<li>${p}</li>`).join('') : '<li>Đang tải...</li>'
@@ -171,6 +212,25 @@ app.get('/', (req, res) => {
       })
     }, 10000)
   </script></body></html>`)
+})
+
+app.get('/launch', (req, res) => {
+  const ip = req.query.ip || '2y2c.org'
+  const port = parseInt(req.query.port || '25565')
+  CUSTOM_HOST = ip
+  CUSTOM_PORT = port
+  LAUNCHER_STATE = true
+  botActive = true
+  createBot()
+  res.redirect('/?pin=' + PIN)
+})
+
+app.get('/offline', (req, res) => {
+  LAUNCHER_STATE = true
+  CUSTOM_HOST = 'localhost'
+  CUSTOM_PORT = 25565
+  botActive = false
+  res.redirect('/?pin=' + PIN)
 })
 
 app.get('/tablist', (req, res) => {

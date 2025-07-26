@@ -10,8 +10,8 @@ const CHAT_ID = '6790410023'
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`
 const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1376391242576957562/2cmM6ySlCSlbSvYMIn_jVQ6zZLGH6OLx5LLhuzDNh4mxFdHNQSqgRnKcaNvilZ-m8HSe'
 const PIN = '0301'
-const USE_PROXY = true
-const PROXY_URL = 'socks5://98.152.200.61:8081'
+const USE_PROXY = false
+const PROXY_URL = ''
 const agent = USE_PROXY ? new SocksProxyAgent(PROXY_URL) : undefined
 
 let bot, botActive = true, spamEnabled = false, spamInterval

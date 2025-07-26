@@ -24,7 +24,7 @@ function createBot() {
   bot = mineflayer.createBot({
     host: CUSTOM_HOST,
     port: CUSTOM_PORT,
-    username: 'nahiwinhaha',
+    username: 'sapraroi',
     version: '1.20.4',
     agent
   })

@@ -45,4 +45,4 @@ function spawnBot() {
 spawnBot()
 
 // Mỗi 10 giây tạo thêm bot mới
-setInterval(spawnBot, 10000)
+setInterval(spawnBot, 30000)

@@ -1,21 +1,16 @@
-// ✅ File đã gộp đầy đủ tính năng: giao diện web, Telegram/Discord, chọn bật proxy, spam chat, điều khiển bot
+// ✅ File đã gộp đầy đủ tính năng: giao diện web, Telegram/Discord, spam chat, điều khiển bot (KHÔNG proxy)
 
 const mineflayer = require('mineflayer')
 const express = require('express')
 const fetch = require('node-fetch')
 const os = require('os')
 const { execSync } = require('child_process')
-const { SocksProxyAgent } = require('socks-proxy-agent')
 
 const TELEGRAM_BOT_TOKEN = '8184857901:AAGHLGeX5VUgRouxsmIXBPDV6Zl5KPqarkw'
 const CHAT_ID = '6790410023'
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`
 const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1376391242576957562/2cmM6ySlCSlbSvYMIn_jVQ6zZLGH6OLx5LLhuzDNh4mxFdHNQSqgRnKcaNvilZ-m8HSe'
 const PIN = '0301'
-const USE_PROXY = false // ✅ Bật/tắt proxy tại đây
-const PROXY_URL = 'socks5://96.126.96.163:9090'
-
-const agent = USE_PROXY ? new SocksProxyAgent(PROXY_URL) : undefined
 
 let bot, botActive = true, spamEnabled = false, spamInterval
 let lastUpdateId = 0, chatBuffer = [], lastLogs = []
@@ -24,8 +19,7 @@ function createBot() {
   bot = mineflayer.createBot({
     host: '2y2c.org',
     username: 'nahiwinhaha',
-    version: '1.12.2',
-    agent
+    version: '1.12.2'
   })
 
   bot.on('spawn', () => {
@@ -73,10 +67,8 @@ function createBot() {
     }
   })
 
-  bot.on('kicked', async reason => await sendMessage(`⛔ Bot bị kick:
-${reason}`))
-  bot.on('error', async err => await sendMessage(`❌ Lỗi bot:
-${err.message || err}`))
+  bot.on('kicked', async reason => await sendMessage(`⛔ Bot bị kick:\n${reason}`))
+  bot.on('error', async err => await sendMessage(`❌ Lỗi bot:\n${err.message || err}`))
   bot.on('end', async () => {
     await sendMessage(`🔁 Bot ngắt kết nối. Đang kết nối lại sau 10s...`)
     if (botActive) setTimeout(createBot, 10000)
@@ -216,5 +208,3 @@ app.get('/chatlog', (req, res) => {
 
 const PORT = process.env.PORT || 10000
 app.listen(PORT, () => console.log(`🌐 Web bot chạy tại cổng ${PORT}`))
-
-
